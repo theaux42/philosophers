@@ -6,7 +6,7 @@
 /*   By: tbabou <tbabou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 23:46:18 by tbabou            #+#    #+#             */
-/*   Updated: 2024/09/05 17:50:32 by tbabou           ###   ########.fr       */
+/*   Updated: 2024/09/05 19:46:28 by tbabou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void	p_dine(t_philo *philo)
 {
-	int			result;
+	int	result;
 
 	pthread_create(&philo->death_t, NULL, (void *)p_death, philo);
 	if (philo->id % 2 != 0)
@@ -32,7 +32,7 @@ void	p_dine(t_philo *philo)
 			p_think(philo);
 		}
 		else
-			break;
+			break ;
 		if (philo->table->max_meals != -1
 			&& philo->nb_meals >= philo->table->max_meals)
 			break ;
@@ -49,6 +49,10 @@ int	p_eat(t_philo *philo)
 		return (0);
 	if (timestamp() - philo->last_meal >= philo->table->time_to_die)
 		return (ft_usleep(philo->table->time_to_eat), 0);
+	pthread_mutex_lock(&philo->table->death);
+	if (philo->table->death_flag == 1)
+		return (0);
+	pthread_mutex_unlock(&philo->table->death);
 	pthread_mutex_lock(&philo->table->forks[philo->id]);
 	print_action(philo, "has taken a fork", 0);
 	pthread_mutex_lock(&philo->table->forks[next_fork]);
@@ -77,14 +81,32 @@ void	p_think(t_philo *philo)
 	philo->is_thinking = 0;
 }
 
+void	end_everythings(t_table *table)
+{
+	int	i;
+
+	i = 0;
+	while (i < table->nb_philo)
+		pthread_mutex_destroy(&table->forks[i++]);
+	i = 0;
+	while (i < table->nb_philo)
+	{
+		pthread_detach(table->philo[i++].death_t);
+		pthread_detach(table->philo[i].thread);
+	}
+	pthread_mutex_destroy(&table->print);
+	pthread_mutex_destroy(&table->death);
+	exit(0);
+}
+
 void	p_death(void *data)
 {
 	t_philo	*philo;
-	int	next_fork;
+	int		next_fork;
 
 	philo = (t_philo *)data;
 	next_fork = (philo->id + 1) % philo->table->nb_philo;
-	while (1)
+	while (philo->table->death_flag != 1)
 	{
 		if (philo->table->max_meals != -1
 			&& philo->nb_meals >= philo->table->max_meals)
@@ -97,7 +119,9 @@ void	p_death(void *data)
 			pthread_mutex_unlock(&philo->table->forks[next_fork]);
 			pthread_mutex_unlock(&philo->table->forks[philo->id]);
 			pthread_detach(philo->thread);
+			philo->table->death_flag = 1;
 			print_action(philo, "died", 1);
+			end_everythings(philo->table);
 			break ;
 		}
 		pthread_mutex_unlock(&philo->table->death);

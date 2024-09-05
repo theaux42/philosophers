@@ -6,7 +6,7 @@
 /*   By: tbabou <tbabou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 23:46:37 by tbabou            #+#    #+#             */
-/*   Updated: 2024/09/05 17:16:26 by tbabou           ###   ########.fr       */
+/*   Updated: 2024/09/05 19:45:05 by tbabou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ int	set_value(t_table *table, int ac, char **av)
 	return (0);
 }
 
-void set_forks(t_table *table)
+void	set_forks(t_table *table)
 {
 	int	i;
 
@@ -54,7 +54,6 @@ void set_forks(t_table *table)
 	pthread_mutex_init(&table->print, NULL);
 	pthread_mutex_init(&table->death, NULL);
 }
-
 
 int	set_table(t_table *table)
 {
