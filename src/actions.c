@@ -6,7 +6,7 @@
 /*   By: tbabou <tbabou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 23:46:18 by tbabou            #+#    #+#             */
-/*   Updated: 2024/09/05 17:32:28 by tbabou           ###   ########.fr       */
+/*   Updated: 2024/09/05 17:50:32 by tbabou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	p_dine(t_philo *philo)
 	{
 		if (philo->table->death_flag == 1)
 			break ;
-		if (!philo->is_eating)
+		if (!philo->is_eating && philo->table->nb_philo > 1)
 		{
 			result = p_eat(philo);
 			if (!result)
@@ -31,11 +31,12 @@ void	p_dine(t_philo *philo)
 			p_sleep(philo);
 			p_think(philo);
 		}
+		else
+			break;
 		if (philo->table->max_meals != -1
 			&& philo->nb_meals >= philo->table->max_meals)
 			break ;
 	}
-	print_action(philo, "has finished eating", 0);
 	pthread_join(philo->death_t, NULL);
 }
 
@@ -79,8 +80,10 @@ void	p_think(t_philo *philo)
 void	p_death(void *data)
 {
 	t_philo	*philo;
+	int	next_fork;
 
 	philo = (t_philo *)data;
+	next_fork = (philo->id + 1) % philo->table->nb_philo;
 	while (1)
 	{
 		if (philo->table->max_meals != -1
@@ -91,7 +94,10 @@ void	p_death(void *data)
 		pthread_mutex_lock(&philo->table->death);
 		if (timestamp() - philo->last_meal > philo->table->time_to_die)
 		{
-			print_action(philo, "died", 0);
+			pthread_mutex_unlock(&philo->table->forks[next_fork]);
+			pthread_mutex_unlock(&philo->table->forks[philo->id]);
+			pthread_detach(philo->thread);
+			print_action(philo, "died", 1);
 			break ;
 		}
 		pthread_mutex_unlock(&philo->table->death);
