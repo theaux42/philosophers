@@ -6,7 +6,7 @@
 /*   By: tbabou <tbabou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 20:57:44 by tbabou            #+#    #+#             */
-/*   Updated: 2024/09/05 16:17:52 by tbabou           ###   ########.fr       */
+/*   Updated: 2024/09/05 17:16:33 by tbabou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,11 @@ void	print_action(t_philo *philo, char *action, int i)
 		i = 0;
 	pthread_mutex_lock(&philo->table->print);
 	if (i)
-		printf("%s%lld %d %s%s\n", RED, timestamp() - philo->start, philo->id,
-			action, RESET);
+		printf("%s%lld %d %s%s\n", RED, timestamp() - philo->start, philo->id
+			+ 1, action, RESET);
 	else
-		printf("%lld %d %s\n", timestamp() - philo->start, philo->id, action);
+		printf("%lld %d %s\n", timestamp() - philo->start, philo->id + 1,
+			action);
 	if (!i)
 		pthread_mutex_unlock(&philo->table->print);
 }
@@ -68,4 +69,22 @@ void	ft_usleep(int ms)
 	time = timestamp();
 	while (timestamp() - time < ms)
 		usleep(ms / 10);
+}
+
+void	clean_table(t_table *table)
+{
+	int	i;
+
+	i = 0;
+	while (i < table->nb_philo)
+		pthread_detach(table->philo[i++].thread);
+	i = 0;
+	while (i < table->nb_philo)
+		pthread_detach(table->philo[i++].death_t);
+	i = 0;
+	while (i < table->nb_philo)
+		pthread_mutex_destroy(&table->forks[i++]);
+	pthread_mutex_destroy(&table->print);
+	pthread_mutex_destroy(&table->death);
+	exit(0);
 }

@@ -6,7 +6,7 @@
 /*   By: tbabou <tbabou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/04 23:46:37 by tbabou            #+#    #+#             */
-/*   Updated: 2024/09/05 16:22:03 by tbabou           ###   ########.fr       */
+/*   Updated: 2024/09/05 17:16:26 by tbabou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,21 @@ int	set_value(t_table *table, int ac, char **av)
 	return (0);
 }
 
+void set_forks(t_table *table)
+{
+	int	i;
+
+	i = 0;
+	while (i < table->nb_philo)
+	{
+		pthread_mutex_init(&table->forks[i], NULL);
+		i++;
+	}
+	pthread_mutex_init(&table->print, NULL);
+	pthread_mutex_init(&table->death, NULL);
+}
+
+
 int	set_table(t_table *table)
 {
 	int				i;
@@ -58,12 +73,6 @@ int	set_table(t_table *table)
 		table->philo[i].is_thinking = 0;
 		table->philo[i].start = start;
 		table->philo[i].table = table;
-		i++;
-	}
-	i = 0;
-	while (i <= table->nb_philo)
-	{
-		pthread_mutex_init(&table->forks[i], NULL);
 		i++;
 	}
 	return (0);

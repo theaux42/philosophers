@@ -6,7 +6,7 @@
 /*   By: tbabou <tbabou@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/22 17:43:01 by tbabou            #+#    #+#             */
-/*   Updated: 2024/09/05 15:28:31 by tbabou           ###   ########.fr       */
+/*   Updated: 2024/09/05 17:09:46 by tbabou           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ typedef struct s_philo
 	int					is_thinking;
 	t_table				*table;
 	pthread_t			thread;
+	pthread_t			death_t;
 }						t_philo;
 
 typedef struct s_table
@@ -46,7 +47,6 @@ typedef struct s_table
 	int					death_flag;
 	pthread_mutex_t		print;
 	pthread_mutex_t		death;
-	pthread_mutex_t		meal;
 	pthread_mutex_t		forks[200];
 	t_philo				philo[200];
 }						t_table;
@@ -63,12 +63,13 @@ int						check_value(char *str);
 int						set_value(t_table *table, int ac, char **av);
 int						set_table(t_table *table);
 void					start_dine(t_table *table);
-
+void					set_forks(t_table *table);
 // functions in src/utils.c
 void					print_action(t_philo *philo, char *action, int i);
 long long				timestamp(void);
 void					ft_usleep(int ms);
 int						ft_atoi(const char *str);
+void					clean_table(t_table *table);
 
 # define BLACK "\e[0;30m"
 # define RED "\e[0;31m"
